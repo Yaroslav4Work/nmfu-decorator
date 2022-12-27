@@ -10,12 +10,13 @@ export namespace FilesUploads {
     export type Fields = {
       [fileField: string]: {
         dest?: string;
+        maxCount?: number;
       };
     };
 
     export namespace Validator {
       export type Func = (
-        data: Express.Multer.File,
+        data: Express.Multer.File | Express.Multer.File[],
       ) => FilesUploads.Params.Validator.Res;
 
       export type Res = {
@@ -30,7 +31,7 @@ export namespace FileSave {
   export type Func = (
     field: string,
     uploadParams: FilesUploads.Params,
-    fileObj: Express.Multer.File,
+    fileObj: Express.Multer.File | Express.Multer.File[],
     callback: FileSave.Callback.Func,
   ) => void;
 
@@ -40,7 +41,7 @@ export namespace FileSave {
 }
 
 export type HasFiles = {
-  [fileField: string]: Express.Multer.File;
+  [fileField: string]: Express.Multer.File | Express.Multer.File[];
 };
 
 export type FilesUploaded = {

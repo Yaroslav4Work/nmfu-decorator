@@ -6,15 +6,27 @@ import { MIME_TYPES } from './constants';
 import { FileSave, FilesUploaded, FilesUploads, HasFiles } from './types';
 
 /* Функция проверки - соответствует ли тип объекта: Express.Multer.File */
-const isMulterFile = (fileObj: Express.Multer.File): boolean =>
-  fileObj.hasOwnProperty('fieldname') &&
-  fileObj.hasOwnProperty('mimetype') &&
-  fileObj.hasOwnProperty('size') &&
-  fileObj.hasOwnProperty('buffer');
+const isMulterFile = (
+  fileObj: Express.Multer.File | Express.Multer.File[],
+): boolean => {
+  const filesObjects = Array.isArray(fileObj) ? fileObj : [fileObj];
+  let result = true;
+
+  for (fileObj of filesObjects) {
+    result =
+      result &&
+      fileObj.hasOwnProperty('fieldname') &&
+      fileObj.hasOwnProperty('mimetype') &&
+      fileObj.hasOwnProperty('size') &&
+      fileObj.hasOwnProperty('buffer');
+  }
+
+  return result;
+};
 
 /* Функция использования валидатора, если он есть */
 const smartUseValidator = (
-  fileObj: Express.Multer.File,
+  fileObj: Express.Multer.File | Express.Multer.File[],
   validator?: FilesUploads.Params.Validator.Func,
 ) => {
   const validated = validator
@@ -43,32 +55,36 @@ const createHashFileName = () =>
 const smartFileSave: FileSave.Func = (
   field: string,
   uploadParams: FilesUploads.Params,
-  fileObj: Express.Multer.File,
+  fileObj: Express.Multer.File | Express.Multer.File[],
   callback: FileSave.Callback.Func,
 ) => {
-  for (const mimeType of uploadParams.mimeTypes) {
-    const match = fileObj.mimetype.match(mimeType);
+  const filesObjects = Array.isArray(fileObj) ? fileObj : [fileObj];
 
-    if (!match) continue;
+  for (fileObj of filesObjects.slice(0, uploadParams.fields[field].maxCount)) {
+    for (const mimeType of uploadParams.mimeTypes) {
+      const match = fileObj.mimetype.match(mimeType);
 
-    const savedFileName = createHashFileName();
-    const savedFilePath = `${savedFileName}.${mimeType}`;
+      if (!match) continue;
 
-    const dest = uploadParams.fields[field].dest ?? uploadParams.dest;
-    const preparedDest = ['\\', '/'].includes(dest[dest.length - 1])
-      ? dest
-      : dest + '/';
+      const savedFileName = createHashFileName();
+      const savedFilePath = `${savedFileName}.${mimeType}`;
 
-    if (!existsSync(preparedDest)) {
-      mkdirSync(preparedDest, { recursive: true });
+      const dest = uploadParams.fields[field].dest ?? uploadParams.dest;
+      const preparedDest = ['\\', '/'].includes(dest[dest.length - 1])
+        ? dest
+        : dest + '/';
+
+      if (!existsSync(preparedDest)) {
+        mkdirSync(preparedDest, { recursive: true });
+      }
+
+      writeFileSync(
+        `${preparedDest}${savedFilePath}`,
+        Buffer.from(fileObj.buffer),
+      );
+
+      callback(field, savedFileName);
     }
-
-    writeFileSync(
-      `${preparedDest}${savedFilePath}`,
-      Buffer.from(fileObj.buffer),
-    );
-
-    callback(field, savedFileName);
   }
 };
 
@@ -87,12 +103,15 @@ const FileUpload = createParamDecorator(
       if (!isMulterFile(rpcReq[field])) continue;
 
       smartUseValidator(rpcReq[field], data.validator);
+
+      updatedDto[field] = [];
+
       smartFileSave(
         field,
         data,
         rpcReq[field],
         (field: string, savedFileName: string) => {
-          updatedDto[field] = savedFileName;
+          updatedDto[field].push(savedFileName);
         },
       );
     }
@@ -101,7 +120,4 @@ const FileUpload = createParamDecorator(
   },
 );
 
-export {
-    MIME_TYPES,
-    FileUpload,
-};
+export { MIME_TYPES, FileUpload };

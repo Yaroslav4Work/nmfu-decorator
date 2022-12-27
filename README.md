@@ -11,10 +11,10 @@ NestJS Microservice Files Upload Decorator
         Декоратор параметра контроллера в микросервисе NestJS;
     </li>
     <li>
-        Позволяет принимать файлы типа Express.Multer.File и сохранать их;
+        Позволяет принимать файлы типа Express.Multer.File | Express.Multer.File[] и сохранать их;
     </li>
     <li>
-        После сохранения файла, объект запроса (DTO) модифицируется - объект файла (Express.Multer.File) трансформируется в имя сохраненного файла (string).
+        После сохранения файла, объект запроса (DTO) модифицируется - объект файла (Express.Multer.File | Express.Multer.File[]) трансформируется в имя сохраненного файла (string[]).
     </li>
 </ul>
 
