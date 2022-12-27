@@ -36,7 +36,7 @@ export namespace FileSave {
   ) => void;
 
   export namespace Callback {
-    export type Func = (field: string, savedFileName: string) => void;
+    export type Func = (field: string, savedFilePath: string) => void;
   }
 }
 
@@ -45,5 +45,5 @@ export type HasFiles = {
 };
 
 export type FilesUploaded = {
-  [fileField: string]: any;
+  [fileField: string]: string | string[];
 };

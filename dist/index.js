@@ -60,7 +60,7 @@ const smartFileSave = (field, uploadParams, fileObj, callback) => {
                 (0, fs_1.mkdirSync)(preparedDest, { recursive: true });
             }
             (0, fs_1.writeFileSync)(`${preparedDest}${savedFilePath}`, Buffer.from(fileObj.buffer));
-            callback(field, savedFileName);
+            callback(field, savedFilePath);
         }
     }
 };
@@ -71,19 +71,22 @@ const smartFileSave = (field, uploadParams, fileObj, callback) => {
 */
 const FileUpload = (0, common_1.createParamDecorator)((data, ctx) => {
     const rpcReq = ctx.switchToRpc().getData();
-    const updatedDto = Object.assign({}, rpcReq);
+    let updatedFilesDto = {};
     for (const field in rpcReq) {
         if (!data.fields[field])
             continue;
         if (!isMulterFile(rpcReq[field]))
             continue;
         smartUseValidator(rpcReq[field], data.validator);
-        updatedDto[field] = [];
-        smartFileSave(field, data, rpcReq[field], (field, savedFileName) => {
-            updatedDto[field].push(savedFileName);
+        smartFileSave(field, data, rpcReq[field], (field, savedFilePath) => {
+            updatedFilesDto[field] = updatedFilesDto[field] ? [...updatedFilesDto[field], savedFilePath] : [savedFilePath];
         });
     }
-    return updatedDto;
+    for (const fileField in updatedFilesDto) {
+        if (updatedFilesDto[fileField].length === 1)
+            updatedFilesDto[fileField] = updatedFilesDto[fileField][0];
+    }
+    return Object.assign(Object.assign({}, rpcReq), updatedFilesDto);
 });
 exports.FileUpload = FileUpload;
 //# sourceMappingURL=index.js.map

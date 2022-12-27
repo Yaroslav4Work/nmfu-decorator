@@ -83,7 +83,7 @@ const smartFileSave: FileSave.Func = (
         Buffer.from(fileObj.buffer),
       );
 
-      callback(field, savedFileName);
+      callback(field, savedFilePath);
     }
   }
 };
@@ -96,27 +96,31 @@ const smartFileSave: FileSave.Func = (
 const FileUpload = createParamDecorator(
   (data: FilesUploads.Params, ctx: ExecutionContext) => {
     const rpcReq: HasFiles = ctx.switchToRpc().getData();
-    const updatedDto: FilesUploaded = { ...rpcReq };
+    let updatedFilesDto: FilesUploaded = {};
 
     for (const field in rpcReq) {
       if (!data.fields[field]) continue;
       if (!isMulterFile(rpcReq[field])) continue;
 
       smartUseValidator(rpcReq[field], data.validator);
-
-      updatedDto[field] = [];
-
       smartFileSave(
         field,
         data,
         rpcReq[field],
-        (field: string, savedFileName: string) => {
-          updatedDto[field].push(savedFileName);
+        (field: string, savedFilePath: string) => {
+            updatedFilesDto[field] = updatedFilesDto[field] ? [...updatedFilesDto[field], savedFilePath] : [savedFilePath];
         },
       );
     }
 
-    return updatedDto;
+    for (const fileField in updatedFilesDto) {
+        if (updatedFilesDto[fileField].length === 1) updatedFilesDto[fileField] = updatedFilesDto[fileField][0];
+    }
+
+    return {
+        ...rpcReq,
+        ...updatedFilesDto,
+    }
   },
 );
 

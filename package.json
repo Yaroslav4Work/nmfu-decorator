@@ -1,12 +1,13 @@
 {
   "name": "nmfu-decorator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NestJS microservice file upload decorator",
   "main": "./dist/index.js",
   "scripts": {
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "clean": "npm run format && npm run lint",
+    "build": "npx tsc build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
