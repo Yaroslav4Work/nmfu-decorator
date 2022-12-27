@@ -1,0 +1,22 @@
+const MIME_TYPE_JPG = 'jpg';
+const MIME_TYPE_JPEG = 'jpeg';
+const MIME_TYPE_GIF = 'gif';
+const MIME_TYPE_WEBP = 'webp';
+const MIME_TYPE_PNG = 'png';
+
+const MIME_TYPES = [
+  MIME_TYPE_JPG,
+  MIME_TYPE_JPEG,
+  MIME_TYPE_GIF,
+  MIME_TYPE_WEBP,
+  MIME_TYPE_PNG,
+];
+
+export {
+  MIME_TYPES,
+  MIME_TYPE_JPG,
+  MIME_TYPE_JPEG,
+  MIME_TYPE_GIF,
+  MIME_TYPE_WEBP,
+  MIME_TYPE_PNG,
+};
